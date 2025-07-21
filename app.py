@@ -347,6 +347,7 @@ def generate_video_from_frames(frames, output_path, fps=30):
     frames = torch.from_numpy(np.asarray(frames))
     if not os.path.exists(os.path.dirname(output_path)):
         os.makedirs(os.path.dirname(output_path))
+    fps = int(fps)
     torchvision.io.write_video(output_path, frames, fps=fps, video_codec="libx264")
     return output_path
 
@@ -378,7 +379,7 @@ SAM_checkpoint = download_checkpoint(sam_checkpoint_url, folder, sam_checkpoint)
 xmem_checkpoint = download_checkpoint(xmem_checkpoint_url, folder, xmem_checkpoint)
 e2fgvi_checkpoint = download_checkpoint_from_google_drive(e2fgvi_checkpoint_id, folder, e2fgvi_checkpoint)
 args.port = 12212
-args.device = "cuda:3"
+# args.device = "cuda:3"
 # args.mask_save = True
 
 # initialize sam, xmem, e2fgvi models
@@ -429,7 +430,7 @@ with gr.Blocks() as iface:
         # for user video input
         with gr.Column():
             with gr.Row(scale=0.4):
-                video_input = gr.Video(autosize=True)
+                video_input = gr.Video()
                 with gr.Column():
                     video_info = gr.Textbox(label="Video Info")
                     resize_info = gr.Textbox(value="If you want to use the inpaint function, it is best to git clone the repo and use a machine with more VRAM locally. \
@@ -454,16 +455,16 @@ with gr.Blocks() as iface:
                                 interactive=True,
                                 visible=False)
                             remove_mask_button = gr.Button(value="Remove mask", interactive=True, visible=False) 
-                            clear_button_click = gr.Button(value="Clear clicks", interactive=True, visible=False).style(height=160)
+                            clear_button_click = gr.Button(value="Clear clicks", interactive=True, visible=False, scale=2)
                             Add_mask_button = gr.Button(value="Add mask", interactive=True, visible=False)
-                    template_frame = gr.Image(type="pil",interactive=True, elem_id="template_frame", visible=False).style(height=360)
+                    template_frame = gr.Image(type="pil",interactive=True, elem_id="template_frame", visible=False, scale=2)
                     image_selection_slider = gr.Slider(minimum=1, maximum=100, step=1, value=1, label="Track start frame", visible=False)
                     track_pause_number_slider = gr.Slider(minimum=1, maximum=100, step=1, value=1, label="Track end frame", visible=False)
             
                 with gr.Column():
                     run_status = gr.HighlightedText(value=[("Text","Error"),("to be","Label 2"),("highlighted","Label 3")], visible=False)
                     mask_dropdown = gr.Dropdown(multiselect=True, value=[], label="Mask selection", info=".", visible=False)
-                    video_output = gr.Video(autosize=True, visible=False).style(height=360)
+                    video_output = gr.Video(visible=False, scale=2)
                     with gr.Row():
                         tracking_video_predict_button = gr.Button(value="Tracking", visible=False)
                         inpaint_video_predict_button = gr.Button(value="Inpainting", visible=False)
@@ -597,6 +598,6 @@ with gr.Blocks() as iface:
         outputs=[video_input],
         # cache_examples=True,
     ) 
-iface.queue(concurrency_count=1)
-iface.launch(debug=True, enable_queue=True, server_port=args.port, server_name="0.0.0.0")
+iface.queue()
+iface.launch(debug=True, server_port=args.port, server_name="0.0.0.0")
 # iface.launch(debug=True, enable_queue=True)
