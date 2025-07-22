@@ -8,4 +8,3 @@ sudo rm -rf /usr/local/cuda*
 sudo apt update
 sudo apt install build-essential dkms linux-headers-$(uname -r) -y
 sudo apt install nvidia-driver-535 -y
-sudo apt install nvidia-cuda-toolkit
